@@ -1,0 +1,15 @@
+FROM golang:1.14.4 AS build
+
+WORKDIR /app
+
+COPY . .
+
+RUN go build -tags netgo -o bin/drone-grafana-docker ./cmd/drone-grafana-docker
+
+FROM docker:19.03.11-dind
+
+ENV DOCKER_HOST=unix:///var/run/docker.sock
+
+COPY --from=build /app/bin/drone-grafana-docker /app/bin/
+
+ENTRYPOINT ["/usr/local/bin/dockerd-entrypoint.sh", "/app/bin/drone-grafana-docker"]

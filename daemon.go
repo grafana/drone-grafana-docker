@@ -4,7 +4,6 @@ import "github.com/rs/zerolog/log"
 
 const dockerExe = "/usr/local/bin/docker"
 const dockerdExe = "/usr/local/bin/dockerd"
-const grabplExe = "/drone/src/bin/grabpl"
 
 // startDaemon starts the Docker daemon.
 func (p Plugin) startDaemon() {

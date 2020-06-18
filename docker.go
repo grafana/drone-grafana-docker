@@ -79,17 +79,20 @@ func (p Plugin) Exec() error {
 	var cmds []*exec.Cmd
 	cmds = append(cmds, commandVersion())
 	cmds = append(cmds, commandInfo())
-
-	cmds = append(cmds, commandBuild(p.Build))
+	// Enable execution of Docker images for other architectures
+	cmds = append(cmds, exec.Command("docker", "run", "--privileged", "--rm",
+		"docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64"))
+	// TODO: Take --ubuntu into account
+	cmds = append(cmds, exec.Command("./bin/grabpl", "build-docker"))
 
 	if p.Cleanup {
 		cmds = append(cmds, commandRmi(p.Build.Name))
 		cmds = append(cmds, commandPrune())
 	}
 
-	// Execute all commands in batch mode.
+	// Execute all commands in batch mode
 	for _, cmd := range cmds {
-		log.Debug().Msgf("Executing %q", cmd.Path)
+		log.Debug().Msgf("Executing %q: %s", cmd.Path, strings.Join(cmd.Args, ", "))
 
 		output, err := cmd.CombinedOutput()
 		if err != nil {
@@ -125,15 +128,6 @@ func commandInfo() *exec.Cmd {
 	return exec.Command(dockerExe, "info")
 }
 
-func commandBuild(build Build) *exec.Cmd {
-	args := []string{
-		"--version",
-	}
-
-	log.Debug().Str("path", grabplExe).Msgf("Executing grabpl")
-	return exec.Command(grabplExe, args...)
-}
-
 // commandDaemon is a helper function to create the docker daemon command.
 func commandDaemon(daemon Daemon) *exec.Cmd {
 	args := []string{
@@ -159,10 +153,4 @@ func isCommandRmi(args []string) bool {
 
 func commandRmi(tag string) *exec.Cmd {
 	return exec.Command(dockerExe, "rmi", tag)
-}
-
-// trace writes each command to stdout with the command wrapped in an xml
-// tag so that it can be extracted and displayed in the logs.
-func trace(cmd *exec.Cmd) {
-	fmt.Fprintf(os.Stdout, "+ %s\n", strings.Join(cmd.Args, " "))
 }

@@ -79,9 +79,6 @@ func (p Plugin) Exec() error {
 	var cmds []*exec.Cmd
 	cmds = append(cmds, commandVersion())
 	cmds = append(cmds, commandInfo())
-	// Enable execution of Docker images for other architectures
-	cmds = append(cmds, exec.Command("docker", "run", "--privileged", "--rm",
-		"docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64"))
 	// TODO: Take --ubuntu into account
 	cmds = append(cmds, exec.Command("./bin/grabpl", "build-docker"))
 
@@ -92,17 +89,18 @@ func (p Plugin) Exec() error {
 
 	// Execute all commands in batch mode
 	for _, cmd := range cmds {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
 		log.Debug().Msgf("Executing %q: %s", cmd.Path, strings.Join(cmd.Args, ", "))
 
-		output, err := cmd.CombinedOutput()
-		if err != nil {
+		if err := cmd.Run(); err != nil {
 			switch {
 			case isCommandPrune(cmd.Args):
-				log.Warn().Str("output", string(output)).Msg("Could not prune system containers. Ignoring...")
+				log.Warn().Msg("Could not prune system containers. Ignoring...")
 			case isCommandRmi(cmd.Args):
-				log.Warn().Str("output", string(output)).Msgf("Could not remove image %q. Ignoring...", cmd.Args[2])
+				log.Warn().Msgf("Could not remove image %q. Ignoring...", cmd.Args[2])
 			default:
-				return fmt.Errorf("Command failed: %w\n%s", err, output)
+				return fmt.Errorf("Command failed: %w", err)
 			}
 		}
 	}

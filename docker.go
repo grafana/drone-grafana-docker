@@ -23,9 +23,12 @@ type (
 
 	// Build defines Docker build parameters.
 	Build struct {
-		Remote string // Git remote URL
-		Name   string // Docker build using default named tag
-		Squash bool   // Docker build squash
+		Edition   string // Grafana edition
+		Ubuntu    bool   // Build Ubuntu variant?
+		Directory string // Directory to build in
+		Remote    string // Git remote URL
+		Name      string // Docker build using default named tag
+		Squash    bool   // Docker build squash
 	}
 
 	// Plugin defines the Docker plugin parameters.
@@ -79,8 +82,13 @@ func (p Plugin) Exec() error {
 	var cmds []*exec.Cmd
 	cmds = append(cmds, commandVersion())
 	cmds = append(cmds, commandInfo())
-	// TODO: Take --ubuntu into account
-	cmds = append(cmds, exec.Command("./bin/grabpl", "build-docker"))
+	buildArgs := []string{
+		"build-docker", "--edition", p.Build.Edition,
+	}
+	if p.Build.Ubuntu {
+		buildArgs = append(buildArgs, "--ubuntu")
+	}
+	cmds = append(cmds, exec.Command("./bin/grabpl", buildArgs...))
 
 	if p.Cleanup {
 		cmds = append(cmds, commandRmi(p.Build.Name))
@@ -91,6 +99,10 @@ func (p Plugin) Exec() error {
 	for _, cmd := range cmds {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+		if p.Build.Directory != "" {
+			log.Debug().Msgf("Building in directory %q", p.Build.Directory)
+			cmd.Dir = p.Build.Directory
+		}
 		log.Debug().Msgf("Executing %q: %s", cmd.Path, strings.Join(cmd.Args, ", "))
 
 		if err := cmd.Run(); err != nil {

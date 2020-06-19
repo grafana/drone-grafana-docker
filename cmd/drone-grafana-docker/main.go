@@ -20,9 +20,24 @@ func main() {
 	app.Action = run
 	app.Version = version
 	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:   "edition",
+			Usage:  "Grafana edition",
+			EnvVar: "PLUGIN_EDITION",
+		},
+		cli.BoolFlag{
+			Name:   "ubuntu",
+			Usage:  "Build Ubuntu variant?",
+			EnvVar: "PLUGIN_UBUNTU",
+		},
+		cli.StringFlag{
+			Name:   "directory",
+			Usage:  "Specify directory to build in",
+			EnvVar: "PLUGIN_DIRECTORY",
+		},
 		cli.BoolFlag{
 			Name:   "dry-run",
-			Usage:  "dry run disables docker push",
+			Usage:  "Don't publish images",
 			EnvVar: "PLUGIN_DRY_RUN",
 		},
 		cli.StringFlag{
@@ -72,8 +87,11 @@ func run(c *cli.Context) error {
 			Password: c.String("docker.password"),
 		},
 		Build: docker.Build{
-			Name:   c.String("commit.sha"),
-			Squash: c.Bool("squash"),
+			Edition:   c.String("edition"),
+			Ubuntu:    c.Bool("ubuntu"),
+			Directory: c.String("directory"),
+			Name:      c.String("commit.sha"),
+			Squash:    c.Bool("squash"),
 		},
 	}
 

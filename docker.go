@@ -24,6 +24,7 @@ type (
 	// Build defines Docker build parameters.
 	Build struct {
 		Edition   string // Grafana edition
+		Archs     string // Architectures of images to build
 		Ubuntu    bool   // Build Ubuntu variant?
 		Directory string // Directory to build in
 		Remote    string // Git remote URL
@@ -84,6 +85,9 @@ func (p Plugin) Exec() error {
 	cmds = append(cmds, commandInfo())
 	buildArgs := []string{
 		"build-docker", "--edition", p.Build.Edition,
+	}
+	if p.Build.Archs != "" {
+		buildArgs = append(buildArgs, "--archs", p.Build.Archs)
 	}
 	if p.Build.Ubuntu {
 		buildArgs = append(buildArgs, "--ubuntu")

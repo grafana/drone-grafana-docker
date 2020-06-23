@@ -9,9 +9,7 @@ import (
 	docker "github.com/grafana/drone-grafana-docker"
 )
 
-var (
-	version = "unknown"
-)
+const version = "0.1.0"
 
 func main() {
 	app := cli.NewApp()
@@ -29,6 +27,11 @@ func main() {
 			Name:   "ubuntu",
 			Usage:  "Build Ubuntu variant?",
 			EnvVar: "PLUGIN_UBUNTU",
+		},
+		cli.StringFlag{
+			Name:   "archs",
+			Usage:  "Architectures to build (default: amd64,armv7,arm64)",
+			EnvVar: "PLUGIN_ARCHS",
 		},
 		cli.StringFlag{
 			Name:   "directory",
@@ -88,6 +91,7 @@ func run(c *cli.Context) error {
 		},
 		Build: docker.Build{
 			Edition:   c.String("edition"),
+			Archs:     c.String("archs"),
 			Ubuntu:    c.Bool("ubuntu"),
 			Directory: c.String("directory"),
 			Name:      c.String("commit.sha"),

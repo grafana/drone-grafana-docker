@@ -1,12 +1,12 @@
-FROM golang:1.14.4 AS build
+FROM golang:1.15.0-alpine3.12 AS build
 
 WORKDIR /app
 
 COPY . .
 
-RUN go build -tags netgo -o bin/drone-grafana-docker ./cmd/drone-grafana-docker
+RUN CGO_ENABLED=0 go build -o bin/drone-grafana-docker ./cmd/drone-grafana-docker
 
-FROM docker:19.03.11-dind
+FROM docker:19.03.12-dind
 
 ENV DOCKER_HOST=unix:///var/run/docker.sock
 

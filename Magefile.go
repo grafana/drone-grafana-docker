@@ -9,13 +9,12 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-const version = "0.2.0"
+const version = "0.3.0"
 const imageName = "grafana/drone-grafana-docker"
 
 // Build builds the Docker image.
 func Build() error {
-	if err := sh.RunV("docker", "build", "-t", imageName,
-		"-f", "docker/docker/Dockerfile.linux.amd64", "."); err != nil {
+	if err := sh.RunV("docker", "build", "-t", imageName, "."); err != nil {
 		return err
 	}
 

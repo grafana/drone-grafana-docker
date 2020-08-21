@@ -94,6 +94,16 @@ func (p Plugin) Exec() error {
 	}
 	cmds = append(cmds, exec.Command("./bin/grabpl", buildArgs...))
 
+	if !p.Dryrun {
+		publishArgs := []string{
+			"publish-docker", "--edition", p.Build.Edition,
+		}
+		if p.Build.Ubuntu {
+			publishArgs = append(publishArgs, "--ubuntu")
+		}
+		cmds = append(cmds, exec.Command("./bin/grabpl", publishArgs...))
+	}
+
 	if p.Cleanup {
 		cmds = append(cmds, commandRmi(p.Build.Name))
 		cmds = append(cmds, commandPrune())

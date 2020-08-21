@@ -9,7 +9,7 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-const version = "0.3.0"
+const version = "0.3.1"
 const imageName = "grafana/drone-grafana-docker"
 
 // Build builds the Docker image.

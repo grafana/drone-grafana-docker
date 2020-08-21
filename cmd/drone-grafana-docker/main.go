@@ -9,7 +9,7 @@ import (
 	docker "github.com/grafana/drone-grafana-docker"
 )
 
-const version = "0.2.0"
+const version = "0.3.1"
 
 func main() {
 	app := cli.NewApp()

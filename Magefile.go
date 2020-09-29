@@ -9,7 +9,7 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-const version = "0.3.1"
+const version = "0.3.2"
 const imageName = "grafana/drone-grafana-docker"
 
 // Build builds the Docker image.
@@ -24,11 +24,12 @@ func Build() error {
 // Publish publishes the Docker image.
 func Publish() error {
 	mg.Deps(Build)
-	if err := sh.RunV("docker", "push", fmt.Sprintf("grafana/drone-grafana-docker:%s", version)); err != nil {
+
+	if err := sh.RunV("docker", "push", fmt.Sprintf("%s:%s", imageName, version)); err != nil {
 		return err
 	}
 
-	return sh.RunV("docker", "push", "grafana/drone-grafana-docker")
+	return sh.RunV("docker", "push", imageName)
 }
 
 func Lint() error {

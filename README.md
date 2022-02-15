@@ -1,3 +1,5 @@
+## **[DEPRECATED] This repo is deprecated as of Grafana v8.3.x versions and newer. Docker socket is now mounted as a volume in Drone runners.**
+
 # drone-grafana-docker
 
 Drone plugin that uses Docker-in-Docker to build and publish Grafana Docker images.
